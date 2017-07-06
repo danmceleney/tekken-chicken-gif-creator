@@ -1,17 +1,24 @@
 import React, { Component } from 'react';
+import { fbauth } from '../util/FBauth/fbauth.js';
+
+
 
 class App extends Component {
+  constructor(){
+    super();
 
-  handleSubmit() {
-    console.log('waddup');
+    this.state = {}
+  }
+
+  handleClick(e) {
+    e.preventDefault();
+    fbauth('testing')
   }
 
   render() {
     return(
       <div>
-        <form>
-          <input />
-        </form>
+        <button onClick={this.handleClick}>Test</button>
       </div>
     )
   }
