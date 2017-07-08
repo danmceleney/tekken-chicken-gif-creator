@@ -5,28 +5,47 @@
     <title>React App Setup</title>
   </head>
   <body>
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '488122751527570',
-      cookie     : true,
-      xfbml      : true,
-      version    : 'v2.8'
-    });
-    FB.AppEvents.logPageView();
-    FB.getLoginStatus(function(response) {
-    statusChangeCallback(response);
-  });   
-};
+    <script>
+      loadFB(facebookInit);
 
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
+      function facebookInit() {
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId      : '488122751527570',
+            xfbml      : true,
+            version    : 'v2.9',
+
+          });
+      };
+
+        (function(d, s, id){
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) {return;}
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/sdk.js";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+
+        FB.getLoginStatus(function(response) {
+          console.log('RESPONSE', response);
+          statusChangeCallback(response);
+});
+      }
+      
+      function loadFB(cb) { // loads FB script asynchronously
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = '//connect.facebook.net/en_US/all.js';
+        script.onload = cb;
+        document.head.appendChild(script);
+      }
 </script>
+<div
+  class="fb-like"
+  data-share="true"
+  data-width="450"
+  data-show-faces="true">
+</div>
     <div id="root">
 
     </div>

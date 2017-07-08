@@ -12,7 +12,7 @@ class App extends Component {
 
   handleClick(e) {
     e.preventDefault();
-    fbauth('testing')
+    fbauth()
   }
 
   render() {
