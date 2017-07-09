@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { fbauth } from '../util/FBauth/fbauth.js';
 
-
-
 class App extends Component {
   constructor(){
     super();
