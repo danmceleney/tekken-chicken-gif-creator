@@ -27,7 +27,6 @@
         }(document, 'script', 'facebook-jssdk'));
 
         FB.getLoginStatus(function(response) {
-          console.log('RESPONSE', response);
           statusChangeCallback(response);
 });
       }
