@@ -9,25 +9,6 @@ class App extends Component {
 
     this.state = {}
   }
-  getToken() {
-    console.log('test');
-    //  const payload = {
-    //    'grant_type': 'client_credentials',
-    //    'client_id': authConfig.client_id,
-    //    'client_secret': authConfig.client_secret
-    //   }
-    //   fetch('https://api.gfycat.com/v1/oauth/token', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify({
-    //       payload
-    //     }).then(response => {
-    //       console.log(response.json());
-    //     })
-    //   })
-    }
 
   handleSubmit(event) {
     event.preventDefault();
