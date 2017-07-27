@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import config from '../util/FBauth/authConfig';
 
+
+//Higher Order Component that gets auth token as soon as the page is rendered and passes it to App
 const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
+
   constructor() {
     super();
+    //setting state with token and status to be updated
     this.state = {
       token: null,
       status: null
     }
   }
+  //token getting function
   getToken(client_id, client_secret) {
     //credentials to send with POST request to get auth token from API
     const payload = {
@@ -18,15 +23,17 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
     };
     //The actual API call to gyfcat. Passes in payload which is credentials. This is a Promise
     fetch('https://api.gfycat.com/v1/oauth/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-        //initial API response that tells you the status of the POST request
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+      //initial API response that tells you the status of the POST request
     }).then(response => {
       return response.json();
+      //actual JSON response
     }).then(json => {
+      //updating state with json response values
       this.setState({
         token: json.access_token,
         status: 'SUCCESS'
@@ -36,71 +43,78 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
       this.status = 'ERROR';
     });
   }
-
+  //run this as soon as the page renders
   componentDidMount() {
+    //if there is no token value, set the status to 'FETCHING'
     if(!this.token) {
       this.status = 'FETCHING';
+      //then run the function that gets the token and updates the state
       this.getToken(config.client_id, config.client_secret);
     }
   }
   render() {
-    console.log('HOC', this.state);
+    //pass state values into App component as attribute
     return <App token={this.state.token} status={this.state.status}/>;
   }
 }
 
+//Main App
 class App extends Component {
 
-gifCutter(url, title, minutes, seconds, captions, auth) {
+  // function that makes gif making request
+  //parameters are self explanitory, auth comes from the HOC
+  gifCutter(url, title, minutes, seconds, captions, auth) {
     fetch('https://api.gfycat.com/v1/gfycats', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth}`
-        },
-        body: JSON.stringify({
-            url,
-            title,
-            minutes,
-            seconds,
-            captions
-        })
-    }).then(response => {
-      console.log('fetch response', response);
-        return response.json();
-    }).then(json => {
-      console.log('whole json', json);
-        this.statusCheck(json.gfyname);
-    })
-}
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth}`
+      },
+      body: JSON.stringify({
+          url,
+          title,
+          minutes,
+          seconds,
+          captions
+      })
+      }).then(response => {
+        console.log('fetch response', response);
+          return response.json();
+      }).then(json => {
+        console.log('whole json', json);
+          this.statusCheck(json.gfyname);
+      })
+  }
 
-statusCheck(name) {
+  //function that checks the status of the gif I created, whether it exists or not
+  statusCheck(name) {
     fetch(`https://api.gfycat.com/v1/gfycats/fetch/status/${name}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
         }
-    }).then(response => {
+      }).then(response => {
         return response.json();
-    }).then(json => {
+      }).then(json => {
         console.log('STATUS', json);
+      })
+    }
+
+  //not even sure if I need this tbh
+  fileDropper(secret) {
+    fetch('https://filedrop.gfycat.com', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({secret})
+    }).then(response => {
+      return response.json()
+    }).then(json => {
+      console.log(json);
     })
-}
-
-fileDropper(secret) {
-  fetch('https://filedrop.gfycat.com', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({secret})
-  }).then(response => {
-    return response.json()
-  }).then(json => {
-    console.log(json);
-  })
-}
-
+  }
+  //handle the data that's submitted by input
   handleSubmit(event, token) {
     event.preventDefault();
     const { url, title, minutes, seconds, caption } = event.target;
@@ -110,7 +124,6 @@ fileDropper(secret) {
   }
 
   render() {
-    console.log('APP', this);
     return(
       <div>
         <form onSubmit={(e) => {this.handleSubmit(e, this.props.token)}}>
@@ -136,4 +149,5 @@ fileDropper(secret) {
   }
 }
 
+//export the gycatAuthorization component, but pass in App
 export default GyfcatAuthToken(App);
