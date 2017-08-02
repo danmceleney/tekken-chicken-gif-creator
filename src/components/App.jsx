@@ -72,7 +72,7 @@ class App extends Component {
           'Authorization': `Bearer ${auth}`
       },
       body: JSON.stringify({
-          url,
+          fetchUrl: url,
           title,
           minutes,
           seconds,
@@ -83,15 +83,14 @@ class App extends Component {
           return response.json();
       }).then(json => {
         console.log('whole json', json);
-        this.fileDropper(json.gfyname);
-          // setTimeout(() => {
-          //   this.statusCheck(json.gyfname);
-          // }, 3000);
       })
   }
 
   //function that checks the status of the gif I created, whether it exists or not
-  statusCheck(name) {
+  statusCheck(event) {
+    event.preventDefault();
+    let name = event.target.gfyname.value;
+
     fetch(`https://api.gfycat.com/v1/gfycats/fetch/status/${name}`, {
       method: 'GET',
       headers: {
@@ -105,31 +104,13 @@ class App extends Component {
       })
     }
 
-  //not even sure if I need this tbh
-  fileDropper(key) {
-    console.log('FILE DROP KEY', key);
-    fetch('https://filedrop.gfycat.com', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: key
-      })
-    }).then(response => {
-      console.log('FILE DROP RESPONSE', response);
-      return response.json()
-    }).then(json => {
-      console.log('OTHER DROP RESPONSE', json);
-    })
-  }
   //handle the data that's submitted by input
   handleSubmit(event, token) {
     event.preventDefault();
     const { url, title, minutes, seconds, caption } = event.target;
     const captionArray = [{text:caption.value}];
-    //this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
-    this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
+    this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
+    //this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
   }
 
   testRequest(url, title, minutes, seconds, captions, auth) {
@@ -140,7 +121,7 @@ class App extends Component {
           'Authorization': `Bearer ${auth}`
       },
       body: JSON.stringify({
-          url,
+          fetchUrl: url,
           title,
           minutes,
           seconds
@@ -176,6 +157,11 @@ class App extends Component {
             caption: <input type="text" name="caption" />
           </label>
           <input type="submit" value="Submit" />
+        </form>
+        <form onSubmit={(e) => {this.statusCheck(e)}}>
+          <label>
+            Check Status: <input type="text" name="gfyname" />
+          </label>
         </form>
       </div>
     )

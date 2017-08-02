@@ -22535,7 +22535,7 @@ var App = function (_Component2) {
           'Authorization': 'Bearer ' + auth
         },
         body: JSON.stringify({
-          url: url,
+          fetchUrl: url,
           title: title,
           minutes: minutes,
           seconds: seconds,
@@ -22546,10 +22546,9 @@ var App = function (_Component2) {
         return response.json();
       }).then(function (json) {
         console.log('whole json', json);
-        _this4.fileDropper(json.gfyname);
-        // setTimeout(() => {
-        //   this.statusCheck(json.gyfname);
-        // }, 3000);
+        setTimeout(function () {
+          _this4.statusCheck(json.gyfname);
+        }, 3000);
       });
     }
 
@@ -22557,7 +22556,10 @@ var App = function (_Component2) {
 
   }, {
     key: 'statusCheck',
-    value: function statusCheck(name) {
+    value: function statusCheck(event) {
+      event.preventDefault();
+      var name = event.target.gfyname.value;
+
       fetch('https://api.gfycat.com/v1/gfycats/fetch/status/' + name, {
         method: 'GET',
         headers: {
@@ -22571,27 +22573,6 @@ var App = function (_Component2) {
       });
     }
 
-    //not even sure if I need this tbh
-
-  }, {
-    key: 'fileDropper',
-    value: function fileDropper(key) {
-      console.log('FILE DROP KEY', key);
-      fetch('https://filedrop.gfycat.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: key
-        })
-      }).then(function (response) {
-        console.log('FILE DROP RESPONSE', response);
-        return response.json();
-      }).then(function (json) {
-        console.log('OTHER DROP RESPONSE', json);
-      });
-    }
     //handle the data that's submitted by input
 
   }, {
@@ -22606,8 +22587,8 @@ var App = function (_Component2) {
           caption = _event$target.caption;
 
       var captionArray = [{ text: caption.value }];
-      //this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
-      this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{ x: 'whatever' }], token);
+      this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
+      //this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
     }
   }, {
     key: 'testRequest',
@@ -22621,7 +22602,7 @@ var App = function (_Component2) {
           'Authorization': 'Bearer ' + auth
         },
         body: JSON.stringify({
-          url: url,
+          fetchUrl: url,
           title: title,
           minutes: minutes,
           seconds: seconds
@@ -22680,6 +22661,18 @@ var App = function (_Component2) {
             _react2.default.createElement('input', { type: 'text', name: 'caption' })
           ),
           _react2.default.createElement('input', { type: 'submit', value: 'Submit' })
+        ),
+        _react2.default.createElement(
+          'form',
+          { onSubmit: function onSubmit(e) {
+              _this6.statusCheck(e);
+            } },
+          _react2.default.createElement(
+            'label',
+            null,
+            'Check Status: ',
+            _react2.default.createElement('input', { type: 'text', name: 'gfyname' })
+          )
         )
       );
     }
