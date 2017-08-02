@@ -38,6 +38,7 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
         token: json.access_token,
         status: 'SUCCESS'
       })
+      return json;
     }).catch(error => {
       this.token = null;
       this.status = 'ERROR';
@@ -82,7 +83,10 @@ class App extends Component {
           return response.json();
       }).then(json => {
         console.log('whole json', json);
-          this.statusCheck(json.gfyname);
+        this.fileDropper(json.gfyname);
+          // setTimeout(() => {
+          //   this.statusCheck(json.gyfname);
+          // }, 3000);
       })
   }
 
@@ -94,24 +98,29 @@ class App extends Component {
           'Content-Type': 'application/json'
         }
       }).then(response => {
+        console.log('STATUS CALL', response);
         return response.json();
       }).then(json => {
-        console.log('STATUS', json);
+        console.log('STATUS DETAILS', json);
       })
     }
 
   //not even sure if I need this tbh
-  fileDropper(secret) {
+  fileDropper(key) {
+    console.log('FILE DROP KEY', key);
     fetch('https://filedrop.gfycat.com', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({secret})
+      body: JSON.stringify({
+        name: key
+      })
     }).then(response => {
+      console.log('FILE DROP RESPONSE', response);
       return response.json()
     }).then(json => {
-      console.log(json);
+      console.log('OTHER DROP RESPONSE', json);
     })
   }
   //handle the data that's submitted by input
@@ -119,8 +128,32 @@ class App extends Component {
     event.preventDefault();
     const { url, title, minutes, seconds, caption } = event.target;
     const captionArray = [{text:caption.value}];
-    console.log(captionArray);
-    this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
+    //this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
+    this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
+  }
+
+  testRequest(url, title, minutes, seconds, captions, auth) {
+    fetch('https://api.gfycat.com/v1/gfycats', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth}`
+      },
+      body: JSON.stringify({
+          url,
+          title,
+          minutes,
+          seconds
+        })
+      }).then(response => {
+        console.log('fetch response', response);
+          return response.json();
+      }).then(json => {
+        console.log('whole json', json);
+          setTimeout(() => {
+            this.statusCheck(json.gfyname);
+          }, 3000);
+      })
   }
 
   render() {
