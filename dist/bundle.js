@@ -22525,9 +22525,7 @@ var App = function (_Component2) {
 
     // function that makes gif making request
     //parameters are self explanitory, auth comes from the HOC
-    value: function gifCutter(url, title, minutes, seconds, captions, auth) {
-      var _this4 = this;
-
+    value: function gifCutter(url, title, minutes, seconds, length, auth) {
       fetch('https://api.gfycat.com/v1/gfycats', {
         method: 'POST',
         headers: {
@@ -22537,18 +22535,15 @@ var App = function (_Component2) {
         body: JSON.stringify({
           fetchUrl: url,
           title: title,
-          minutes: minutes,
-          seconds: seconds,
-          captions: captions
+          fetchMinutes: minutes,
+          fetchSeconds: seconds,
+          fetchLength: length
         })
       }).then(function (response) {
         console.log('fetch response', response);
         return response.json();
       }).then(function (json) {
         console.log('whole json', json);
-        setTimeout(function () {
-          _this4.statusCheck(json.gyfname);
-        }, 3000);
       });
     }
 
@@ -22584,43 +22579,15 @@ var App = function (_Component2) {
           title = _event$target.title,
           minutes = _event$target.minutes,
           seconds = _event$target.seconds,
-          caption = _event$target.caption;
+          caption = _event$target.caption,
+          length = _event$target.length;
 
-      var captionArray = [{ text: caption.value }];
-      this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
-      //this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
-    }
-  }, {
-    key: 'testRequest',
-    value: function testRequest(url, title, minutes, seconds, captions, auth) {
-      var _this5 = this;
-
-      fetch('https://api.gfycat.com/v1/gfycats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + auth
-        },
-        body: JSON.stringify({
-          fetchUrl: url,
-          title: title,
-          minutes: minutes,
-          seconds: seconds
-        })
-      }).then(function (response) {
-        console.log('fetch response', response);
-        return response.json();
-      }).then(function (json) {
-        console.log('whole json', json);
-        setTimeout(function () {
-          _this5.statusCheck(json.gfyname);
-        }, 3000);
-      });
+      this.gifCutter(url.value, title.value, minutes.value, seconds.value, length.value, token);
     }
   }, {
     key: 'render',
     value: function render() {
-      var _this6 = this;
+      var _this4 = this;
 
       return _react2.default.createElement(
         'div',
@@ -22628,7 +22595,7 @@ var App = function (_Component2) {
         _react2.default.createElement(
           'form',
           { onSubmit: function onSubmit(e) {
-              _this6.handleSubmit(e, _this6.props.token);
+              _this4.handleSubmit(e, _this4.props.token);
             } },
           _react2.default.createElement(
             'label',
@@ -22657,15 +22624,15 @@ var App = function (_Component2) {
           _react2.default.createElement(
             'label',
             null,
-            'caption: ',
-            _react2.default.createElement('input', { type: 'text', name: 'caption' })
+            'length: ',
+            _react2.default.createElement('input', { type: 'text', name: 'length' })
           ),
           _react2.default.createElement('input', { type: 'submit', value: 'Submit' })
         ),
         _react2.default.createElement(
           'form',
           { onSubmit: function onSubmit(e) {
-              _this6.statusCheck(e);
+              _this4.statusCheck(e);
             } },
           _react2.default.createElement(
             'label',

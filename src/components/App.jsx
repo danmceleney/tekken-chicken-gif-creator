@@ -64,7 +64,7 @@ class App extends Component {
 
   // function that makes gif making request
   //parameters are self explanitory, auth comes from the HOC
-  gifCutter(url, title, minutes, seconds, captions, auth) {
+  gifCutter(url, title, minutes, seconds, length, auth) {
     fetch('https://api.gfycat.com/v1/gfycats', {
       method: 'POST',
       headers: {
@@ -74,9 +74,9 @@ class App extends Component {
       body: JSON.stringify({
           fetchUrl: url,
           title,
-          minutes,
-          seconds,
-          captions
+          fetchMinutes: minutes,
+          fetchSeconds: seconds,
+          fetchLength: length,
       })
       }).then(response => {
         console.log('fetch response', response);
@@ -107,35 +107,15 @@ class App extends Component {
   //handle the data that's submitted by input
   handleSubmit(event, token) {
     event.preventDefault();
-    const { url, title, minutes, seconds, caption } = event.target;
-    const captionArray = [{text:caption.value}];
-    this.gifCutter(url.value, title.value, minutes.value, seconds.value, captionArray, token);
-    //this.testRequest('https://giant.gfycat.com/DetailedFearfulBangeltiger.mp4', 'Test Request', 0, 4, [{x:'whatever'}], token);
+    const { url, title, minutes, seconds, caption, length } = event.target;
+    this.gifCutter(url.value,
+      title.value,
+      minutes.value,
+      seconds.value,
+      length.value,
+      token);
   }
 
-  testRequest(url, title, minutes, seconds, captions, auth) {
-    fetch('https://api.gfycat.com/v1/gfycats', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth}`
-      },
-      body: JSON.stringify({
-          fetchUrl: url,
-          title,
-          minutes,
-          seconds
-        })
-      }).then(response => {
-        console.log('fetch response', response);
-          return response.json();
-      }).then(json => {
-        console.log('whole json', json);
-          setTimeout(() => {
-            this.statusCheck(json.gfyname);
-          }, 3000);
-      })
-  }
 
   render() {
     return(
@@ -154,7 +134,7 @@ class App extends Component {
             seconds: <input type="text" name="seconds" />
           </label>
           <label>
-            caption: <input type="text" name="caption" />
+            length: <input type="text" name="length" />
           </label>
           <input type="submit" value="Submit" />
         </form>
