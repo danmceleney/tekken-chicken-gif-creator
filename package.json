@@ -31,5 +31,9 @@
     "webpack": "^3.3.0",
     "webpack-dev-server": "^2.5.1",
     "whatwg-fetch": "^2.0.3"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.4",
+    "sass-loader": "^6.0.6"
   }
 }
