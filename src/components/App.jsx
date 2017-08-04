@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import config from '../util/FBauth/authConfig';
+import GifCuttingForm from './GifCuttingForm';
+import StatusCheckForm from './StatusCheckForm';
+import StatusPanel from './StatusPanel';
+
 
 
 //Higher Order Component that gets auth token as soon as the page is rendered and passes it to App
@@ -62,9 +66,21 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
 //Main App
 class App extends Component {
 
+    constructor() {
+    super();
+    //setting state with token and status to be updated
+    this.state = {
+      gfyName: null,
+      gfyStatus: null,
+      lastChecked: null,
+      gfyNameHistory: [],
+    }
+  }
+
   // function that makes gif making request
   //parameters are self explanitory, auth comes from the HOC
   gifCutter(url, title, minutes, seconds, length, auth) {
+
     fetch('https://api.gfycat.com/v1/gfycats', {
       method: 'POST',
       headers: {
@@ -83,6 +99,9 @@ class App extends Component {
           return response.json();
       }).then(json => {
         console.log('whole json', json);
+        this.setState({
+          gfyName: json.gfyname,
+        })
       })
   }
 
@@ -90,7 +109,7 @@ class App extends Component {
   statusCheck(event) {
     event.preventDefault();
     let name = event.target.gfyname.value;
-
+    
     fetch(`https://api.gfycat.com/v1/gfycats/fetch/status/${name}`, {
       method: 'GET',
       headers: {
@@ -101,13 +120,25 @@ class App extends Component {
         return response.json();
       }).then(json => {
         console.log('STATUS DETAILS', json);
-      })
+        if(json.task == 'encoding') {
+          this.setState({
+            gfyStatus: 'Working on it!',
+          })
+        } else if (json.task == 'complete') {
+          this.setState({
+          gfyNameHistory: [...this.state.gfyNameHistory, json.gfyname],
+          gfyStatus: 'gif complete!'
+        })
+        }
+      }).catch(err => console.log('Something bad happened :('))
     }
 
   //handle the data that's submitted by input
-  handleSubmit(event, token) {
+  handleSubmit(event) {
     event.preventDefault();
+    const token = this.props.token;
     const { url, title, minutes, seconds, caption, length } = event.target;
+
     this.gifCutter(url.value,
       title.value,
       minutes.value,
@@ -118,32 +149,17 @@ class App extends Component {
 
 
   render() {
+    console.log(this.state);
     return(
-      <div>
-        <form onSubmit={(e) => {this.handleSubmit(e, this.props.token)}}>
-          <label>
-            URL: <input type="text" name="url" />
-          </label>
-          <label>
-            title: <input type="text" name="title" />
-          </label>
-          <label>
-            minutes: <input type="text" name="minutes" />
-          </label>
-          <label>
-            seconds: <input type="text" name="seconds" />
-          </label>
-          <label>
-            length: <input type="text" name="length" />
-          </label>
-          <input type="submit" value="Submit" />
-        </form>
-        <form onSubmit={(e) => {this.statusCheck(e)}}>
-          <label>
-            Check Status: <input type="text" name="gfyname" />
-          </label>
-        </form>
-      </div>
+    <div>
+      <GifCuttingForm handleSubmit={e => this.handleSubmit(e)}/>
+      <StatusPanel
+        gfyName={this.state.gfyName}
+        historyList={this.state.gfyNameHistory}
+        status={this.state.gfyStatus}
+      />
+      <StatusCheckForm statusCheck={e => this.statusCheck(e)}/>
+    </div>
     )
   }
 }
