@@ -22707,13 +22707,13 @@ var GifCuttingForm = function GifCuttingForm(props) {
       _react2.default.createElement(
         "label",
         null,
-        "Character URL: ",
+        "Video URL: ",
         _react2.default.createElement("input", { type: "text", name: "url" })
       ),
       _react2.default.createElement(
         "label",
         null,
-        "Attack Notation: ",
+        "Video Name: ",
         _react2.default.createElement("input", { type: "text", name: "title" })
       ),
       _react2.default.createElement(
@@ -22811,7 +22811,11 @@ var StatusPanel = function StatusPanel(props) {
         _react2.default.createElement(
             'h3',
             null,
-            'Copy/Paste this into Status Check: ',
+            'Copy/Paste this into Status Check:'
+        ),
+        _react2.default.createElement(
+            'h4',
+            null,
             props.gfyName
         ),
         _react2.default.createElement(_StatusHistoryList2.default, { status: props.status, historyList: props.historyList })
@@ -22912,7 +22916,7 @@ exports = module.exports = __webpack_require__(192)(undefined);
 
 
 // module
-exports.push([module.i, ".gif-cutting-form-container form label {\n  display: block; }\n\n.status-history-list {\n  border: 1px solid black;\n  width: 200px; }\n  .status-history-list ul li {\n    list-style: none; }\n", ""]);
+exports.push([module.i, ".gif-cutting-form-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n  .gif-cutting-form-container form label {\n    display: block; }\n\n.status-panel-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n\n.status-history-list ul li {\n  list-style: none; }\n", ""]);
 
 // exports
 

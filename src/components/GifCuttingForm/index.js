@@ -5,10 +5,10 @@ const GifCuttingForm = (props) => {
   <div className="gif-cutting-form-container">
     <form onSubmit={props.handleSubmit}>
       <label>
-        Character URL: <input type="text" name="url" />
+        Video URL: <input type="text" name="url" />
       </label>
       <label>
-        Attack Notation: <input type="text" name="title" />
+        Video Name: <input type="text" name="title" />
       </label>
       <label>
         Start Minute: <input type="text" name="minutes" />
