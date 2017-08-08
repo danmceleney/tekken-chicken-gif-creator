@@ -11,13 +11,16 @@ const GifCuttingForm = (props) => {
         Video Name: <input type="text" name="title" />
       </label>
       <label>
-        Start Minute: <input type="text" name="minutes" />
+        Start Time: 
+          <input className="minute-input" type="number" name="startMinutes" maxLength="2" /> 
+          :
+          <input className="seconds-input" type="number" name="startSeconds" maxLength="2" />
       </label>
       <label>
-        Start Seconds: <input type="text" name="seconds" />
-      </label>
-      <label>
-        Seconds to record: <input type="text" name="length" />
+        End Time: 
+          <input className="minute-input" type="number" name="endMinutes" /> 
+          :
+          <input className="seconds-input" type="number" name="endSeconds" />
       </label>
       <input type="submit" value="Submit" />
     </form>

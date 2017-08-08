@@ -22438,8 +22438,6 @@ var _StatusPanel2 = _interopRequireDefault(_StatusPanel);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -22468,14 +22466,16 @@ var GyfcatAuthToken = function GyfcatAuthToken(App) {
 
     _createClass(GyfcatAuthToken, [{
       key: 'getToken',
-      value: function getToken(client_id, client_secret) {
+      value: function getToken(client_id, client_secret, username, password) {
         var _this2 = this;
 
         //credentials to send with POST request to get auth token from API
         var payload = {
-          'grant_type': 'client_credentials',
+          'grant_type': 'password',
           'client_id': client_id,
-          'client_secret': client_secret
+          'client_secret': client_secret,
+          'username': username,
+          'password': password
         };
         //The actual API call to gyfcat. Passes in payload which is credentials. This is a Promise
         fetch('https://api.gfycat.com/v1/oauth/token', {
@@ -22509,7 +22509,7 @@ var GyfcatAuthToken = function GyfcatAuthToken(App) {
         if (!this.token) {
           this.status = 'FETCHING';
           //then run the function that gets the token and updates the state
-          this.getToken(_authConfig2.default.client_id, _authConfig2.default.client_secret);
+          this.getToken(_authConfig2.default.client_id, _authConfig2.default.client_secret, _authConfig2.default.username, _authConfig2.default.password);
         }
       }
     }, {
@@ -22536,7 +22536,7 @@ var App = function (_Component2) {
     var _this3 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
     _this3.state = {
-      gfyName: null,
+      gfyName: "",
       gfyStatus: null,
       lastChecked: null,
       gfyNameHistory: []
@@ -22567,13 +22567,12 @@ var App = function (_Component2) {
           fetchLength: length
         })
       }).then(function (response) {
-        console.log('fetch response', response);
         return response.json();
       }).then(function (json) {
-        console.log('whole json', json);
         _this4.setState({
           gfyName: json.gfyname
         });
+        _this4.statusCheck(json.gfyname);
       });
     }
 
@@ -22581,11 +22580,8 @@ var App = function (_Component2) {
 
   }, {
     key: 'statusCheck',
-    value: function statusCheck(event) {
+    value: function statusCheck(name) {
       var _this5 = this;
-
-      event.preventDefault();
-      var name = event.target.gfyname.value;
 
       fetch('https://api.gfycat.com/v1/gfycats/fetch/status/' + name, {
         method: 'GET',
@@ -22593,22 +22589,23 @@ var App = function (_Component2) {
           'Content-Type': 'application/json'
         }
       }).then(function (response) {
-        console.log('STATUS CALL', response);
         return response.json();
       }).then(function (json) {
-        console.log('STATUS DETAILS', json);
         if (json.task == 'encoding') {
           _this5.setState({
             gfyStatus: 'Working on it!'
           });
+          setTimeout(_this5.statusCheck(name), 5000);
         } else if (json.task == 'complete') {
           _this5.setState({
-            gfyNameHistory: [].concat(_toConsumableArray(_this5.state.gfyNameHistory), [json.gfyname]),
             gfyStatus: 'gif complete!'
           });
         }
       }).catch(function (err) {
-        return console.log('Something bad happened :(');
+        _this5.setState({
+          gfyStatus: 'Something broke x_x'
+        });
+        console.log(err);
       });
     }
 
@@ -22622,13 +22619,19 @@ var App = function (_Component2) {
       var _event$target = event.target,
           url = _event$target.url,
           title = _event$target.title,
-          minutes = _event$target.minutes,
-          seconds = _event$target.seconds,
-          caption = _event$target.caption,
+          startMinutes = _event$target.startMinutes,
+          startSeconds = _event$target.startSeconds,
+          endMinutes = _event$target.endMinutes,
+          endSeconds = _event$target.endSeconds,
           length = _event$target.length;
 
 
-      this.gifCutter(url.value, title.value, minutes.value, seconds.value, length.value, token);
+      var totalStartSeconds = parseInt(startMinutes.value) * 60 + parseInt(startSeconds.value);
+      var totalEndSeconds = parseInt(endMinutes.value) * 60 + parseInt(endSeconds.value);
+
+      var timeLength = totalEndSeconds - totalStartSeconds;
+
+      this.gifCutter(url.value, title.value, startMinutes.value, startSeconds.value, timeLength, token);
     }
 
     //create album for TC
@@ -22636,9 +22639,9 @@ var App = function (_Component2) {
   }, {
     key: 'albumCreate',
     value: function albumCreate(auth) {
-      console.log(auth);
-      var albumName = 'API_TEST';
-      fetch('https://api.gfycat.com/v1/me/albums/2', {
+
+      var albumName = 'testing a thing';
+      fetch('https://api.gfycat.com/v1/me/folders/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22648,18 +22651,14 @@ var App = function (_Component2) {
           folderName: albumName
         })
       }).then(function (response) {
-        console.log('fetch response', response);
         return response.json();
-      }).then(function (json) {
-        console.log('whole json', json);
-      });
+      }).then(function (json) {});
     }
   }, {
     key: 'render',
     value: function render() {
       var _this6 = this;
 
-      console.log(this.props);
       return _react2.default.createElement(
         'div',
         null,
@@ -22669,18 +22668,9 @@ var App = function (_Component2) {
         _react2.default.createElement(_StatusPanel2.default, {
           gfyName: this.state.gfyName,
           historyList: this.state.gfyNameHistory,
-          status: this.state.gfyStatus
-        }),
-        _react2.default.createElement(_StatusCheckForm2.default, { statusCheck: function statusCheck(e) {
-            return _this6.statusCheck(e);
-          } }),
-        _react2.default.createElement(
-          'button',
-          { onClick: function onClick(e) {
-              return _this6.albumCreate(_this6.props.token);
-            } },
-          'Album Creator'
-        )
+          status: this.state.gfyStatus,
+          link: this.state.gfyLink
+        })
       );
     }
   }]);
@@ -22706,7 +22696,9 @@ Object.defineProperty(exports, "__esModule", {
 var config = {
     client_secret: 'c3_2pVMfxPahJQ0WsmPAZ57pIaAOjs4E4tnOSjZ8EYc2KvgjN71Eaxf2mQU0L5bQ',
     auth_code: 'ab2f8fc4abe20f6800dbe17808e615bb',
-    client_id: '2_vZN6ri'
+    client_id: '2_vZN6ri',
+    username: 'offinbed',
+    password: '0100403Nn'
 };
 
 exports.default = config;
@@ -22750,20 +22742,18 @@ var GifCuttingForm = function GifCuttingForm(props) {
       _react2.default.createElement(
         "label",
         null,
-        "Start Minute: ",
-        _react2.default.createElement("input", { type: "text", name: "minutes" })
+        "Start Time:",
+        _react2.default.createElement("input", { className: "minute-input", type: "number", name: "startMinutes", maxLength: "2" }),
+        ":",
+        _react2.default.createElement("input", { className: "seconds-input", type: "number", name: "startSeconds", maxLength: "2" })
       ),
       _react2.default.createElement(
         "label",
         null,
-        "Start Seconds: ",
-        _react2.default.createElement("input", { type: "text", name: "seconds" })
-      ),
-      _react2.default.createElement(
-        "label",
-        null,
-        "Seconds to record: ",
-        _react2.default.createElement("input", { type: "text", name: "length" })
+        "End Time:",
+        _react2.default.createElement("input", { className: "minute-input", type: "number", name: "endMinutes" }),
+        ":",
+        _react2.default.createElement("input", { className: "seconds-input", type: "number", name: "endSeconds" })
       ),
       _react2.default.createElement("input", { type: "submit", value: "Submit" })
     )
@@ -22842,14 +22832,27 @@ var StatusPanel = function StatusPanel(props) {
         _react2.default.createElement(
             'h3',
             null,
-            'Copy/Paste this into Status Check:'
+            'Status for:'
         ),
         _react2.default.createElement(
             'h4',
             null,
             props.gfyName
         ),
-        _react2.default.createElement(_StatusHistoryList2.default, { status: props.status, historyList: props.historyList })
+        _react2.default.createElement(
+            'h4',
+            null,
+            props.status
+        ),
+        props.status == 'gif complete!' ? _react2.default.createElement(
+            'a',
+            { href: 'https://gfycat.com/' + props.gfyName },
+            'Link to gif!'
+        ) : _react2.default.createElement(
+            'h4',
+            null,
+            'Waiting for Gif link'
+        )
     );
 };
 
@@ -22947,7 +22950,7 @@ exports = module.exports = __webpack_require__(192)(undefined);
 
 
 // module
-exports.push([module.i, ".gif-cutting-form-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n  .gif-cutting-form-container form label {\n    display: block; }\n\n.status-panel-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n\n.status-history-list ul li {\n  list-style: none; }\n", ""]);
+exports.push([module.i, ".gif-cutting-form-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n  .gif-cutting-form-container form label {\n    display: block; }\n  .gif-cutting-form-container .minute-input {\n    width: 25px; }\n  .gif-cutting-form-container .seconds-input {\n    width: 25px; }\n\n.status-panel-container {\n  border: 1px solid black;\n  width: 500px;\n  text-align: center; }\n\n.status-history-list ul li {\n  list-style: none; }\n", ""]);
 
 // exports
 

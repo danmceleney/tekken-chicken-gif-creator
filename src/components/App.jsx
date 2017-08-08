@@ -20,7 +20,6 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
   //token getting function
   getToken(client_id, client_secret, username, password) {
     //credentials to send with POST request to get auth token from API
-    console.log(username, password);
     const payload = {
         'grant_type': 'password',
         'client_id': client_id,
@@ -40,7 +39,6 @@ const GyfcatAuthToken = App => class GyfcatAuthToken extends Component {
       return response.json();
       //actual JSON response
     }).then(json => {
-      console.log('AUTH JSON', json);
       //updating state with json response values
       this.setState({
         token: json.access_token,
@@ -74,7 +72,7 @@ class App extends Component {
     super();
     //setting state with token and status to be updated
     this.state = {
-      gfyName: null,
+      gfyName: "",
       gfyStatus: null,
       lastChecked: null,
       gfyNameHistory: [],
@@ -99,12 +97,10 @@ class App extends Component {
           fetchLength: length,
       })
       }).then(response => {
-        console.log('fetch response', response);
           return response.json();
       }).then(json => {
-        console.log('whole json', json);
         this.setState({
-          gfyName: json.gfyname,
+          gfyName: json.gfyname
         })
         this.statusCheck(json.gfyname);
       })
@@ -119,10 +115,8 @@ class App extends Component {
           'Content-Type': 'application/json'
         }
       }).then(response => {
-        console.log('STATUS CALL', response);
         return response.json();
       }).then(json => {
-        console.log('STATUS DETAILS', json);
         if(json.task == 'encoding') {
           this.setState({
             gfyStatus: 'Working on it!',
@@ -132,28 +126,37 @@ class App extends Component {
           this.setState({
           gfyStatus: 'gif complete!'
         })
-        setTimeout(()=> {console.log('testing after complete')}, 2000)
         }
-      }).catch(err => console.log(err))
+      }).catch(err => {
+        this.setState({
+          gfyStatus: 'Something broke x_x'
+        });
+        console.log(err);
+      })
     }
 
   //handle the data that's submitted by input
   handleSubmit(event) {
     event.preventDefault();
     const token = this.props.token;
-    const { url, title, minutes, seconds, caption, length } = event.target;
+    const { url, title, startMinutes, startSeconds, endMinutes, endSeconds, length } = event.target;
+
+    let totalStartSeconds = parseInt(startMinutes.value) * 60 + parseInt(startSeconds.value);
+    let totalEndSeconds = parseInt(endMinutes.value) * 60 + parseInt(endSeconds.value);
+
+    let timeLength = totalEndSeconds - totalStartSeconds;
 
     this.gifCutter(url.value,
       title.value,
-      minutes.value,
-      seconds.value,
-      length.value,
+      startMinutes.value,
+      startSeconds.value,
+      timeLength,
       token);
   }
 
   //create album for TC
   albumCreate(auth) {
-    console.log(auth);
+
     const albumName = 'testing a thing';
     fetch(`https://api.gfycat.com/v1/me/folders/`, {
       method: 'POST',
@@ -165,16 +168,13 @@ class App extends Component {
           folderName: albumName,
         })
       }).then(response => {
-        console.log('fetch response', response);
           return response.json();
       }).then(json => {
-        console.log('whole json', json);
       })
   }
   
 
   render() {
-    console.log(this.props);
     return(
     <div>
       <GifCuttingForm handleSubmit={e => this.handleSubmit(e)}/>
@@ -182,9 +182,8 @@ class App extends Component {
         gfyName={this.state.gfyName}
         historyList={this.state.gfyNameHistory}
         status={this.state.gfyStatus}
+        link={this.state.gfyLink}
       />
-      <StatusCheckForm statusCheck={e => this.statusCheck(e)}/>
-      <button onClick={e => this.albumCreate(this.props.token)}>Album Creator</button>
     </div>
     )
   }
