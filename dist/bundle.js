@@ -22630,12 +22630,36 @@ var App = function (_Component2) {
 
       this.gifCutter(url.value, title.value, minutes.value, seconds.value, length.value, token);
     }
+
+    //create album for TC
+
+  }, {
+    key: 'albumCreate',
+    value: function albumCreate(auth) {
+      console.log(auth);
+      var albumName = 'API_TEST';
+      fetch('https://api.gfycat.com/v1/me/albums/2', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + auth
+        },
+        body: JSON.stringify({
+          folderName: albumName
+        })
+      }).then(function (response) {
+        console.log('fetch response', response);
+        return response.json();
+      }).then(function (json) {
+        console.log('whole json', json);
+      });
+    }
   }, {
     key: 'render',
     value: function render() {
       var _this6 = this;
 
-      console.log(this.state);
+      console.log(this.props);
       return _react2.default.createElement(
         'div',
         null,
@@ -22649,7 +22673,14 @@ var App = function (_Component2) {
         }),
         _react2.default.createElement(_StatusCheckForm2.default, { statusCheck: function statusCheck(e) {
             return _this6.statusCheck(e);
-          } })
+          } }),
+        _react2.default.createElement(
+          'button',
+          { onClick: function onClick(e) {
+              return _this6.albumCreate(_this6.props.token);
+            } },
+          'Album Creator'
+        )
       );
     }
   }]);
