@@ -81,7 +81,7 @@ class App extends Component {
 
   // function that makes gif making request
   //parameters are self explanitory, auth comes from the HOC
-  gifCutter(url, title, minutes, seconds, length, auth) {
+  gifCutter(url, title, minutes, seconds, length, tagArray, auth) {
 
     fetch('https://api.gfycat.com/v1/gfycats', {
       method: 'POST',
@@ -139,40 +139,66 @@ class App extends Component {
   handleSubmit(event) {
     event.preventDefault();
     const token = this.props.token;
-    const { url, title, startMinutes, startSeconds, endMinutes, endSeconds, length } = event.target;
-
+    const { url, title, startMinutes, startSeconds, endMinutes, endSeconds, charName } = event.target;
     let totalStartSeconds = parseInt(startMinutes.value) * 60 + parseInt(startSeconds.value);
     let totalEndSeconds = parseInt(endMinutes.value) * 60 + parseInt(endSeconds.value);
-
     let timeLength = totalEndSeconds - totalStartSeconds;
+
+    this.folderCheck(charName.value, token)
+
+    const tagArray = ['T7 Chicken', 'Tekken', charName.value];
 
     this.gifCutter(url.value,
       title.value,
       startMinutes.value,
       startSeconds.value,
       timeLength,
+      charName,
       token);
   }
 
-  //create album for TC
-  albumCreate(auth) {
-
-    const albumName = 'testing a thing';
-    fetch(`https://api.gfycat.com/v1/me/folders/`, {
+  //create folder for characters
+  folderCreate(folder, auth) {
+    console.log('creating folder');
+    fetch(`https://api.gfycat.com/v1/me/folders/1`, {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth}`,
       },
-        body: JSON.stringify({
-          folderName: albumName,
-        })
-      }).then(response => {
-          return response.json();
-      }).then(json => {
+      body: JSON.stringify({
+        folderName: folder
+      })
+      }).catch(err => {
+        console.log(err);
       })
   }
-  
+
+  folderCheck(folderName, auth) {
+    
+    const findFolderByTitle = (title, folders) => !!folders.find(folder => folder.title === title)
+
+    fetch(`https://api.gfycat.com/v1/me/folders`, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth}`,
+      }
+      }).then(response => {
+          return response.json();
+        })
+        .then(json => {
+          let folderArray = json[0].nodes;
+          console.log(findFolderByTitle(folderName, folderArray));
+          if(findFolderByTitle(folderName, folderArray) == true) {
+            console.log('Do not make a folder');
+            return;
+          } else if(findFolderByTitle(folderName, folderArray)  == false) {
+            console.log('Do make a folder');
+            this.folderCreate(folderName, auth);
+          }
+      }).catch(err => console.log(err));
+    }
 
   render() {
     return(

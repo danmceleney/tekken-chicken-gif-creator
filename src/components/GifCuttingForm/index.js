@@ -3,12 +3,15 @@ import React, { Component } from 'react';
 const GifCuttingForm = (props) => {
   return (
   <div className="gif-cutting-form-container">
-    <form onSubmit={props.handleSubmit}>
+    <form onSubmit={props.handleSubmit} noValidate>
+      <label>
+        Character Name: <input type="text" name="charName" />
+      </label>
       <label>
         Video URL: <input type="text" name="url" />
       </label>
       <label>
-        Video Name: <input type="text" name="title" />
+        Notation: <input type="text" name="title" />
       </label>
       <label>
         Start Time: 
