@@ -76,6 +76,7 @@ class App extends Component {
       gfyStatus: null,
       lastChecked: null,
       gfyNameHistory: [],
+      moveNotation: "",
     }
   }
 
@@ -100,7 +101,8 @@ class App extends Component {
           return response.json();
       }).then(json => {
         this.setState({
-          gfyName: json.gfyname
+          gfyName: json.gfyname,
+          moveNotation: title,
         })
         this.statusCheck(json.gfyname);
       })
@@ -144,6 +146,11 @@ class App extends Component {
     let totalEndSeconds = parseInt(endMinutes.value) * 60 + parseInt(endSeconds.value);
     let timeLength = totalEndSeconds - totalStartSeconds;
 
+    if(this.state.moveNotation === title.value) {
+      alert(`Don't forget to change the notation!`);
+      return;
+    }
+    
     this.folderCheck(charName.value, token)
 
     const tagArray = ['T7 Chicken', 'Tekken', charName.value];
@@ -191,10 +198,8 @@ class App extends Component {
           let folderArray = json[0].nodes;
           console.log(findFolderByTitle(folderName, folderArray));
           if(findFolderByTitle(folderName, folderArray) == true) {
-            console.log('Do not make a folder');
             return;
           } else if(findFolderByTitle(folderName, folderArray)  == false) {
-            console.log('Do make a folder');
             this.folderCreate(folderName, auth);
           }
       }).catch(err => console.log(err));
